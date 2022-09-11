@@ -76,6 +76,8 @@ public class PropHuntPlugin extends Plugin
 		if (GameState.LOGGED_IN.equals(event.getGameState()))
 		{
 			if(config.hideMode()) clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
+			propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
+					config.hideMode(), config.modelID().toInt()));
 		}
 	}
 
@@ -91,9 +93,11 @@ public class PropHuntPlugin extends Plugin
 			getPlayerConfigs();
 		}
 
-		propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
-				config.hideMode(), config.modelID().toInt()));
-		clientThread.invokeLater(() -> transmogOtherPlayers());
+		if(client.getLocalPlayer() != null) {
+			propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
+					config.hideMode(), config.modelID().toInt()));
+			clientThread.invokeLater(() -> transmogOtherPlayers());
+		}
 	}
 
 	@Subscribe
@@ -194,9 +198,11 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void transmogOtherPlayers() {
-		if(players == null) return;
+		if(players == null || client.getLocalPlayer() == null) return;
 
 		client.getPlayers().forEach(player -> {
+			if(client.getLocalPlayer() == player) return;
+
 			PropHuntPlayerData data = playersData.get(player.getName());
 
 			if(data == null || !data.hiding) return;
