@@ -1,18 +1,18 @@
 package com.idyl.prophunt;
 
 public class PropHuntPlayerData {
-    public int modelId;
+    public int modelID;
     public String username;
     public boolean hiding;
 
-    public PropHuntPlayerData(String username, boolean hiding, int modelId) {
+    public PropHuntPlayerData(String username, boolean hiding, int modelID) {
         this.username = username;
         this.hiding = hiding;
-        this.modelId = modelId;
+        this.modelID = modelID;
     }
 
     @Override
     public String toString() {
-        return "username: "+username+", hiding: "+hiding+", modelID: "+modelId;
+        return "username: "+username+", hiding: "+hiding+", modelID: "+ modelID;
     }
 }

@@ -16,10 +16,11 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.task.Schedule;
 
-import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Slf4j
@@ -43,9 +44,9 @@ public class PropHuntPlugin extends Plugin
 	@Inject
 	private PropHuntDataManager propHuntDataManager;
 
-	private RuneLiteObject disguise;
+	private RuneLiteObject localDisguise;
 
-	private HashMap<String, RuneLiteObject>playerDisguises;
+	private HashMap<String, RuneLiteObject> playerDisguises = new HashMap<>();
 
 	private String[] players;
 	private HashMap<String, PropHuntPlayerData> playersData;
@@ -58,46 +59,54 @@ public class PropHuntPlugin extends Plugin
 		playersData = new HashMap<>();
 		hooks.registerRenderableDrawListener(drawListener);
 		clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
+		setPlayersFromString(config.players());
+		getPlayerConfigs();
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		clientThread.invokeLater(this::removeTransmog);
+		clientThread.invokeLater(this::removeAllTransmogs);
 		hooks.unregisterRenderableDrawListener(drawListener);
 	}
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		if (GameState.LOGGED_IN.equals(event.getGameState()) && config.hideMode())
+		if (GameState.LOGGED_IN.equals(event.getGameState()))
 		{
-			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
+			if(config.hideMode()) clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		}
 	}
 
 	@Subscribe
 	public void onConfigChanged(final ConfigChanged event) {
-		clientThread.invokeLater(this::removeTransmog);
+		clientThread.invokeLater(this::removeAllTransmogs);
 		if(config.hideMode()) {
 			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		}
 
 		if(event.getKey().equals("players")) {
-			log.info("Players changed");
 			setPlayersFromString(config.players());
-			log.info(config.players());
+			getPlayerConfigs();
 		}
+
+		propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
+				config.hideMode(), config.modelID().toInt()));
+		clientThread.invokeLater(() -> transmogOtherPlayers());
 	}
 
 	@Subscribe
 	public void onGameTick(final GameTick event) {
-		if(config.hideMode() && disguise != null) {
+		if(config.hideMode() && localDisguise != null) {
 			WorldPoint playerPoint = client.getLocalPlayer().getWorldLocation();
-			disguise.setLocation(LocalPoint.fromWorld(client, playerPoint), playerPoint.getPlane());
+			localDisguise.setLocation(LocalPoint.fromWorld(client, playerPoint), playerPoint.getPlane());
 		}
+
+		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
 	}
 
+	// Hide players who are participating in prop hunt
 	@VisibleForTesting
 	boolean shouldDraw(Renderable renderable, boolean drawingUI)
 	{
@@ -121,7 +130,6 @@ public class PropHuntPlugin extends Plugin
 				if(data == null) return true;
 
 				if(data.hiding) {
-					clientThread.invokeLater(() -> transmogPlayer(player));
 					return !data.hiding;
 				}
 			}
@@ -131,9 +139,13 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void transmogPlayer(Player player) {
-		if(!config.hideMode() || client.getLocalPlayer() == null) return;
+		transmogPlayer(player, config.modelID().toInt(), true);
+	}
 
-		disguise = client.createRuneLiteObject();
+	private void transmogPlayer(Player player, int modelID, boolean local) {
+		if(client.getLocalPlayer() == null) return;
+
+		RuneLiteObject disguise = client.createRuneLiteObject();
 
 		LocalPoint loc = LocalPoint.fromWorld(client, player.getWorldLocation());
 		if (loc == null)
@@ -141,7 +153,7 @@ public class PropHuntPlugin extends Plugin
 			return;
 		}
 
-		Model model = client.loadModel(config.modelID().toInt());
+		Model model = client.loadModel(modelID);
 
 		if (model == null)
 		{
@@ -161,7 +173,7 @@ public class PropHuntPlugin extends Plugin
 					return false;
 				}
 
-				disguise.setModel(reloadedModel);
+				localDisguise.setModel(reloadedModel);
 
 				return true;
 			});
@@ -172,32 +184,84 @@ public class PropHuntPlugin extends Plugin
 
 		disguise.setLocation(loc, player.getWorldLocation().getPlane());
 		disguise.setActive(true);
+
+		if(local) {
+			localDisguise = disguise;
+		}
+		else {
+			playerDisguises.put(player.getName(), disguise);
+		}
 	}
 
-	private void removeTransmog()
-	{
-		if (disguise != null)
+	private void transmogOtherPlayers() {
+		if(players == null) return;
+
+		client.getPlayers().forEach(player -> {
+			PropHuntPlayerData data = playersData.get(player.getName());
+
+			if(data == null || !data.hiding) return;
+
+			transmogPlayer(player, data.modelID, false);
+		});
+	}
+
+	private void removeLocalTransmog() {
+		if (localDisguise != null)
 		{
-			disguise.setActive(false);
+			localDisguise.setActive(false);
 		}
-		disguise = null;
+		localDisguise = null;
+	}
+
+	private void removeTransmogs()
+	{
+		playerDisguises.forEach((p, disguise) -> {
+			if(disguise == null) return;
+
+			disguise.setActive(false);
+			disguise = null;
+		});
+	}
+
+	private void removeAllTransmogs() {
+		removeTransmogs();
+		removeLocalTransmog();
+	}
+
+	private void updateDisguiseLocation(Player p) {
+		RuneLiteObject obj = playerDisguises.get(p.getName());
+		if(obj == null) return;
+
+		obj.setLocation(p.getLocalLocation(), p.getWorldLocation().getPlane());
 	}
 
 	private void setPlayersFromString(String playersString) {
 		players = playersString.split(",");
-		getPlayerConfigs();
 	}
 
-	private void getPlayerConfigs() {
+	@Schedule(
+			period = 15,
+			unit = ChronoUnit.SECONDS,
+			asynchronous = true
+	)
+	public void getPlayerConfigs() {
 		if(players.length < 1) return;
+
+		log.info("Getting player configs...");
 
 		propHuntDataManager.getPropHuntersByUsernames(players);
 	}
 
 	// Called from PropHuntDataManager
 	public void updatePlayerData(HashMap<String, PropHuntPlayerData> data) {
-		playersData.clear();
-		playersData.putAll(data);
+		clientThread.invokeLater(() -> {
+			removeTransmogs();
+			playersData.clear();
+			playerDisguises.clear();
+			playersData.putAll(data);
+			playersData.values().forEach(player -> playerDisguises.put(player.username, null));
+			transmogOtherPlayers();
+		});
 	}
 
 	@Provides

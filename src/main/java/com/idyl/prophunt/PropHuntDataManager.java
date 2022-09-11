@@ -24,47 +24,52 @@ public class PropHuntDataManager {
     @Inject
     private Gson gson;
 
-    public void getAllPropHunters() {
-        log.debug("Getting prop hunters...");
-        try {
+    protected void updatePropHuntApi(PropHuntPlayerData data)
+    {
+        String username = urlifyString(data.username);
+        String url = baseUrl.concat("/prop-hunters/"+username);
+
+        log.info(gson.toJson(data));
+
+        try
+        {
             Request r = new Request.Builder()
-                    .url(baseUrl.concat("/prop-hunters"))
-                    .get()
+                    .url(url)
+                    .post(RequestBody.create(JSON, gson.toJson(data)))
                     .build();
 
-            okHttpClient.newCall(r).enqueue(new Callback() {
+            okHttpClient.newCall(r).enqueue(new Callback()
+            {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    log.debug("Error getting prop hunt data", e);
+                public void onFailure(Call call, IOException e)
+                {
+                    log.debug("Error sending post data", e);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if(response.isSuccessful()) {
-                        log.info("Successfully fetch prop hunter data");
-                        try
-                        {
-                            JsonObject j = new Gson().fromJson(response.body().string(), JsonObject.class);
-                            log.debug(j.toString());
-                        }
-                        catch (IOException | JsonSyntaxException e)
-                        {
-                            log.error(e.getMessage());
-                        }
+                public void onResponse(Call call, Response response)
+                {
+                    if (response.isSuccessful())
+                    {
+                        log.info("Successfully sent prop hunt data");
+                        response.close();
+                    }
+                    else
+                    {
+                        log.info("Post request unsuccessful");
+                        response.close();
                     }
                 }
             });
         }
-        catch(IllegalArgumentException e) {
+        catch (IllegalArgumentException e)
+        {
             log.error("Bad URL given: " + e.getLocalizedMessage());
         }
     }
 
     public void getPropHuntersByUsernames(String[] players) {
-        log.info("Getting prop hunters by username...");
-        String playersString = String.join(",", players).trim().replaceAll("\\s", "%20");
-
-        log.info("Sending to request to "+baseUrl.concat("/prop-hunters/".concat(playersString)));
+        String playersString = urlifyString(String.join(",", players));
 
         try {
             Request r = new Request.Builder()
@@ -81,14 +86,11 @@ public class PropHuntDataManager {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if(response.isSuccessful()) {
-                        log.info("Successfully fetched prop hunter data");
                         try
                         {
                             JsonArray j = new Gson().fromJson(response.body().string(), JsonArray.class);
-                            log.info(j.toString());
                             HashMap<String, PropHuntPlayerData> playerData = parsePropHuntData(j);
                             plugin.updatePlayerData(playerData);
-                            log.info("Finished parsing response");
                         }
                         catch (IOException | JsonSyntaxException e)
                         {
@@ -116,5 +118,9 @@ public class PropHuntDataManager {
             l.put(username, d);
         }
         return l;
+    }
+
+    private String urlifyString(String str) {
+        return str.trim().replaceAll("\\s", "%20");
     }
 }
