@@ -62,7 +62,9 @@ public class PropHuntDataManager {
 
     public void getPropHuntersByUsernames(String[] players) {
         log.info("Getting prop hunters by username...");
-        String playersString = String.join(",", players);
+        String playersString = String.join(",", players).trim().replaceAll("\\s", "%20");
+
+        log.info("Sending to request to "+baseUrl.concat("/prop-hunters/".concat(playersString)));
 
         try {
             Request r = new Request.Builder()
@@ -79,18 +81,22 @@ public class PropHuntDataManager {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if(response.isSuccessful()) {
-                        log.info("Successfully fetch prop hunter data");
+                        log.info("Successfully fetched prop hunter data");
                         try
                         {
                             JsonArray j = new Gson().fromJson(response.body().string(), JsonArray.class);
                             log.info(j.toString());
-                            plugin.updatePlayerData(parsePropHuntData(j));
+                            HashMap<String, PropHuntPlayerData> playerData = parsePropHuntData(j);
+                            plugin.updatePlayerData(playerData);
+                            log.info("Finished parsing response");
                         }
                         catch (IOException | JsonSyntaxException e)
                         {
                             log.error(e.getMessage());
                         }
                     }
+
+                    response.close();
                 }
             });
         }
@@ -106,7 +112,7 @@ public class PropHuntDataManager {
             JsonObject jObj = jsonElement.getAsJsonObject();
             String username = jObj.get("username").getAsString();
             PropHuntPlayerData d = new PropHuntPlayerData(jObj.get("username").getAsString(),
-                    jObj.get("hiding").getAsBoolean(), jObj.get("modelId").getAsInt());
+                    jObj.get("hiding").getAsBoolean(), jObj.get("modelID").getAsInt());
             l.put(username, d);
         }
         return l;

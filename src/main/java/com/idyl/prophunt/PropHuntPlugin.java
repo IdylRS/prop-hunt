@@ -55,6 +55,7 @@ public class PropHuntPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		playersData = new HashMap<>();
 		hooks.registerRenderableDrawListener(drawListener);
 		clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 	}
@@ -115,9 +116,9 @@ public class PropHuntPlugin extends Plugin
 			ArrayList<String> playerList = new ArrayList<>(Arrays.asList(players));
 
 			if(playerList.contains(player.getName())) {
-				if(playersData == null) return true;
-
 				PropHuntPlayerData data = playersData.get(player.getName());
+
+				if(data == null) return true;
 
 				if(data.hiding) {
 					clientThread.invokeLater(() -> transmogPlayer(player));
@@ -185,7 +186,6 @@ public class PropHuntPlugin extends Plugin
 	private void setPlayersFromString(String playersString) {
 		players = playersString.split(",");
 		getPlayerConfigs();
-		log.info(players+"");
 	}
 
 	private void getPlayerConfigs() {
@@ -196,8 +196,8 @@ public class PropHuntPlugin extends Plugin
 
 	// Called from PropHuntDataManager
 	public void updatePlayerData(HashMap<String, PropHuntPlayerData> data) {
-		log.info("Got data"+data.toString());
-		playersData = data;
+		playersData.clear();
+		playersData.putAll(data);
 	}
 
 	@Provides

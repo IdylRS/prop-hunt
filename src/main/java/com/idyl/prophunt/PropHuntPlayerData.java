@@ -10,4 +10,9 @@ public class PropHuntPlayerData {
         this.hiding = hiding;
         this.modelId = modelId;
     }
+
+    @Override
+    public String toString() {
+        return "username: "+username+", hiding: "+hiding+", modelID: "+modelId;
+    }
 }
