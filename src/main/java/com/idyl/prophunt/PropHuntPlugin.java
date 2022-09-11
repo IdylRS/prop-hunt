@@ -53,6 +53,8 @@ public class PropHuntPlugin extends Plugin
 
 	private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
 
+	private final long SECONDS_BETWEEN_GET = 5;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -246,7 +248,7 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	@Schedule(
-			period = 15,
+			period = SECONDS_BETWEEN_GET,
 			unit = ChronoUnit.SECONDS,
 			asynchronous = true
 	)
