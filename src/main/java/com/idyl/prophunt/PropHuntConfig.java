@@ -26,4 +26,11 @@ public interface PropHuntConfig extends Config
 	{
 		return PropHuntModelId.DEAD_TREE;
 	}
+
+	@ConfigItem(
+			keyName = "players",
+			name = "Player Names",
+			description = "Names of the players you are playing with (comma separated)"
+	)
+	default String players() { return ""; }
 }
