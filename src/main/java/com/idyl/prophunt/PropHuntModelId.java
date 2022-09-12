@@ -11,7 +11,8 @@ public enum PropHuntModelId {
     SPADE(9556),
     MUSHROOM(11985),
     SKELETON(1078),
-    PIPE(12471),
+    SKELETON2(1080),
+    PIPE(12472),
     BOULDER(15624),
     CANNONBALLS(1550);
 
