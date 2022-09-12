@@ -172,7 +172,7 @@ public class PropHuntPlugin extends Plugin
 					return true;
 				}
 
-				Model reloadedModel = client.loadModel(config.modelID().toInt());
+				Model reloadedModel = client.loadModel(modelID);
 
 				if (reloadedModel == null)
 				{

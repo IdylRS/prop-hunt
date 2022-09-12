@@ -19,12 +19,12 @@ public interface PropHuntConfig extends Config
 
 	@ConfigItem(
 			keyName = "modelID",
-			name = "Model ID",
+			name = "Model",
 			description = "ID for the model you want to appear as"
 	)
 	default PropHuntModelId modelID()
 	{
-		return PropHuntModelId.DEAD_TREE;
+		return PropHuntModelId.BUSH;
 	}
 
 	@ConfigItem(
