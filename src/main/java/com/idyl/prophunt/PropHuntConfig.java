@@ -18,6 +18,16 @@ public interface PropHuntConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "hideMinimapDots",
+			name = "Hide Minimap Dots",
+			description = "Toggle whether minimap dots are hidden"
+	)
+	default boolean hideMinimapDots()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "modelID",
 			name = "Model",
 			description = "ID for the model you want to appear as"

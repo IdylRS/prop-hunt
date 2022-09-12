@@ -54,6 +54,13 @@ public class PropHuntPlugin extends Plugin
 	private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
 
 	private final long SECONDS_BETWEEN_GET = 5;
+	private static final int DOT_PLAYER = 2;
+	private static final int DOT_FRIEND = 3;
+	private static final int DOT_TEAM = 4;
+	private static final int DOT_FRIENDSCHAT = 5;
+	private static final int DOT_CLAN = 6;
+
+	private SpritePixels[] originalDotSprites;
 
 	@Override
 	protected void startUp() throws Exception
@@ -63,6 +70,8 @@ public class PropHuntPlugin extends Plugin
 		clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		setPlayersFromString(config.players());
 		getPlayerConfigs();
+		storeOriginalDots();
+		hideMinimapDots();
 	}
 
 	@Override
@@ -70,6 +79,7 @@ public class PropHuntPlugin extends Plugin
 	{
 		clientThread.invokeLater(this::removeAllTransmogs);
 		hooks.unregisterRenderableDrawListener(drawListener);
+		restoreOriginalDots();
 	}
 
 	@Subscribe
@@ -78,8 +88,16 @@ public class PropHuntPlugin extends Plugin
 		if (GameState.LOGGED_IN.equals(event.getGameState()))
 		{
 			if(config.hideMode()) clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
-			propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
+
+			if(client.getLocalPlayer().getName() != null)
+				propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
 					config.hideMode(), config.modelID().toInt()));
+		}
+
+		if (event.getGameState() == GameState.LOGIN_SCREEN && originalDotSprites == null)
+		{
+			storeOriginalDots();
+			if(config.hideMinimapDots()) hideMinimapDots();
 		}
 	}
 
@@ -93,6 +111,14 @@ public class PropHuntPlugin extends Plugin
 		if(event.getKey().equals("players")) {
 			setPlayersFromString(config.players());
 			getPlayerConfigs();
+		}
+
+		if(event.getKey().equals("hideMinimapDots")) {
+			if (config.hideMinimapDots()) {
+				hideMinimapDots();
+			} else {
+				restoreOriginalDots();
+			}
 		}
 
 		if(client.getLocalPlayer() != null) {
@@ -255,8 +281,6 @@ public class PropHuntPlugin extends Plugin
 	public void getPlayerConfigs() {
 		if(players.length < 1) return;
 
-		log.info("Getting player configs...");
-
 		propHuntDataManager.getPropHuntersByUsernames(players);
 	}
 
@@ -270,6 +294,42 @@ public class PropHuntPlugin extends Plugin
 			playersData.values().forEach(player -> playerDisguises.put(player.username, null));
 			transmogOtherPlayers();
 		});
+	}
+
+	private void hideMinimapDots() {
+		SpritePixels[] mapDots = client.getMapDots();
+
+		if(mapDots == null) return;
+
+		mapDots[DOT_PLAYER] = client.createSpritePixels(new int[0], 0, 0);
+		mapDots[DOT_CLAN] = client.createSpritePixels(new int[0], 0, 0);
+		mapDots[DOT_FRIEND] = client.createSpritePixels(new int[0], 0, 0);
+		mapDots[DOT_FRIENDSCHAT] = client.createSpritePixels(new int[0], 0, 0);
+		mapDots[DOT_TEAM] = client.createSpritePixels(new int[0], 0, 0);
+	}
+
+	private void storeOriginalDots()
+	{
+		SpritePixels[] originalDots = client.getMapDots();
+
+		if (originalDots == null)
+		{
+			return;
+		}
+
+		originalDotSprites = Arrays.copyOf(originalDots, originalDots.length);
+	}
+
+	private void restoreOriginalDots()
+	{
+		SpritePixels[] mapDots = client.getMapDots();
+
+		if (originalDotSprites == null || mapDots == null)
+		{
+			return;
+		}
+
+		System.arraycopy(originalDotSprites, 0, mapDots, 0, mapDots.length);
 	}
 
 	@Provides

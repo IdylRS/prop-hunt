@@ -29,8 +29,6 @@ public class PropHuntDataManager {
         String username = urlifyString(data.username);
         String url = baseUrl.concat("/prop-hunters/"+username);
 
-        log.info(gson.toJson(data));
-
         try
         {
             Request r = new Request.Builder()
@@ -51,12 +49,12 @@ public class PropHuntDataManager {
                 {
                     if (response.isSuccessful())
                     {
-                        log.info("Successfully sent prop hunt data");
+                        log.debug("Successfully sent prop hunt data");
                         response.close();
                     }
                     else
                     {
-                        log.info("Post request unsuccessful");
+                        log.debug("Post request unsuccessful");
                         response.close();
                     }
                 }
