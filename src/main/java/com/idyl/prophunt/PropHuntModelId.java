@@ -2,22 +2,19 @@ package com.idyl.prophunt;
 
 public enum PropHuntModelId {
     DEAD_TREE(11006),
-    BUSH(1669),
-    TREE(1637),
+    BUSH(7826),
+    YEW_TREE(12949),
     CRATE(15402),
+    WOODEN_CRATE(12148),
     ROCK_PILE(1391),
     HAT_STAND(1185),
-    CHEST(11129),
-    BED(1147),
+    CHEST(13975),
     STOOL(10089),
-    UNDOR(10321),
     BANK(10647),
-    POTTED_PLANT(1628),
+    POTTED_PLANT(1620),
     SPADE(9556),
-    SIGN(14651),
     MUSHROOM(11985),
-    MYSTERY(2750),
-    MUSHROOM_AND_ONION(11086);
+    SKELETON(6186);
 
     private final int value;
 
