@@ -7,16 +7,17 @@ public enum PropHuntModelId {
     CRATE(15402),
     ROCK_PILE(1391),
     HAT_STAND(1185),
-    CHEST(11204),
+    CHEST(11129),
     BED(1147),
     STOOL(10089),
     UNDOR(10321),
     BANK(10647),
-    POTTED_PLANT(1632),
-    LIGHT(10941),
-    ROPE(11442),
+    POTTED_PLANT(1628),
     SPADE(9556),
-    SIGN(9555);
+    SIGN(14651),
+    MUSHROOM(11985),
+    MYSTERY(2750),
+    MUSHROOM_AND_ONION(11086);
 
     private final int value;
 
