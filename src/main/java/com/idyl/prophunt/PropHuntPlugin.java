@@ -3,9 +3,12 @@ package com.idyl.prophunt;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
 import javax.inject.Inject;
+
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -17,11 +20,17 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.task.Schedule;
+import net.runelite.client.ui.overlay.Overlay;
+import net.runelite.client.ui.overlay.OverlayManager;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Slf4j
 @PluginDescriptor(
@@ -31,6 +40,9 @@ public class PropHuntPlugin extends Plugin
 {
 	@Inject
 	private Client client;
+
+	@Inject
+	private OverlayManager overlayManager;
 
 	@Inject
 	private PropHuntConfig config;
@@ -43,6 +55,11 @@ public class PropHuntPlugin extends Plugin
 
 	@Inject
 	private PropHuntDataManager propHuntDataManager;
+
+	@Inject
+	private PropHuntOverlay propHuntOverlay;
+
+	private CollisionMap map;
 
 	private RuneLiteObject localDisguise;
 
@@ -60,6 +77,11 @@ public class PropHuntPlugin extends Plugin
 	private static final int DOT_FRIENDSCHAT = 5;
 	private static final int DOT_CLAN = 6;
 
+	@Getter
+	private WorldPoint currentWayPoint;
+
+	private WorldArea area = new WorldArea(3212, 3428, 60, 60, 0);
+
 	private SpritePixels[] originalDotSprites;
 
 	@Override
@@ -72,6 +94,8 @@ public class PropHuntPlugin extends Plugin
 		getPlayerConfigs();
 		storeOriginalDots();
 		hideMinimapDots();
+		loadResources();
+		overlayManager.add(propHuntOverlay);
 	}
 
 	@Override
@@ -80,6 +104,7 @@ public class PropHuntPlugin extends Plugin
 		clientThread.invokeLater(this::removeAllTransmogs);
 		hooks.unregisterRenderableDrawListener(drawListener);
 		restoreOriginalDots();
+		overlayManager.remove(propHuntOverlay);
 	}
 
 	@Subscribe
@@ -92,6 +117,10 @@ public class PropHuntPlugin extends Plugin
 			if(client.getLocalPlayer().getName() != null)
 				propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
 					config.hideMode(), config.modelID().toInt()));
+
+			if(currentWayPoint == null && config.hideMode()) {
+				setWaypoint();
+			}
 		}
 
 		if (event.getGameState() == GameState.LOGIN_SCREEN && originalDotSprites == null)
@@ -104,7 +133,15 @@ public class PropHuntPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(final ConfigChanged event) {
 		clientThread.invokeLater(this::removeAllTransmogs);
-		if(config.hideMode()) {
+
+		if(event.getKey().equals("hideMode") && config.hideMode()) {
+			setWaypoint();
+			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
+		}
+
+		if(event.getKey().equals("hideMode") && !config.hideMode()) {
+			currentWayPoint = null;
+			client.clearHintArrow();
 			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		}
 
@@ -133,6 +170,10 @@ public class PropHuntPlugin extends Plugin
 		if(config.hideMode() && localDisguise != null) {
 			WorldPoint playerPoint = client.getLocalPlayer().getWorldLocation();
 			localDisguise.setLocation(LocalPoint.fromWorld(client, playerPoint), playerPoint.getPlane());
+		}
+
+		if(client.getLocalPlayer().getWorldLocation().equals(currentWayPoint)) {
+			setWaypoint();
 		}
 
 		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
@@ -331,6 +372,44 @@ public class PropHuntPlugin extends Plugin
 
 		System.arraycopy(originalDotSprites, 0, mapDots, 0, mapDots.length);
 	}
+
+	private void setWaypoint() {
+		final List<WorldPoint> points = area.toWorldPointList();
+		setWaypoint(points);
+	}
+
+	private void setWaypoint(List<WorldPoint> points) {
+		final int roll = (int) Math.floor(Math.random()*points.size());
+		currentWayPoint = points.get(roll);
+		boolean isBlocked = map != null && map.isBlocked(currentWayPoint.getX(), currentWayPoint.getY(), currentWayPoint.getPlane());
+		if(!currentWayPoint.isInScene(client) || isBlocked) {
+			setWaypoint(points);
+		}
+
+		client.setHintArrow(currentWayPoint);
+	}
+
+	private void loadResources()
+	{
+		Map<SplitFlagMap.Position, byte[]> compressedRegions = new HashMap<>();
+
+		try (ZipInputStream in = new ZipInputStream(PropHuntPlugin.class.getResourceAsStream("/collision-map.zip"))) {
+			ZipEntry entry;
+			while ((entry = in.getNextEntry()) != null) {
+				String[] n = entry.getName().split("_");
+
+				compressedRegions.put(
+						new SplitFlagMap.Position(Integer.parseInt(n[0]), Integer.parseInt(n[1])),
+						Util.readAllBytes(in)
+				);
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+
+		map = new CollisionMap(64, compressedRegions);
+	}
+
 
 	@Provides
 	PropHuntConfig provideConfig(ConfigManager configManager)
