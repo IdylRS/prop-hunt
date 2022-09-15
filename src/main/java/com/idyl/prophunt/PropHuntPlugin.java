@@ -134,8 +134,8 @@ public class PropHuntPlugin extends Plugin
 	public void onConfigChanged(final ConfigChanged event) {
 		clientThread.invokeLater(this::removeAllTransmogs);
 
-		if(event.getKey().equals("hideMode") && config.hideMode()) {
-			setWaypoint();
+		if(config.hideMode()) {
+			if(event.getKey().equals("hideMode")) setWaypoint();
 			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		}
 
@@ -379,7 +379,7 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void setWaypoint(List<WorldPoint> points) {
-		if(!points.contains(client.getLocalPlayer().getWorldLocation())) return;
+//		if(!points.contains(client.getLocalPlayer().getWorldLocation())) return;
 
 		final int roll = (int) Math.floor(Math.random()*points.size());
 		currentWayPoint = points.get(roll);
