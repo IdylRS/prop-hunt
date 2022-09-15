@@ -379,6 +379,8 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void setWaypoint(List<WorldPoint> points) {
+		if(!points.contains(client.getLocalPlayer().getWorldLocation())) return;
+
 		final int roll = (int) Math.floor(Math.random()*points.size());
 		currentWayPoint = points.get(roll);
 		boolean isBlocked = map != null && map.isBlocked(currentWayPoint.getX(), currentWayPoint.getY(), currentWayPoint.getPlane());
