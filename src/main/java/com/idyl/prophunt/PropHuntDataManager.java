@@ -86,7 +86,7 @@ public class PropHuntDataManager {
                     if(response.isSuccessful()) {
                         try
                         {
-                            JsonArray j = new Gson().fromJson(response.body().string(), JsonArray.class);
+                            JsonArray j = gson.fromJson(response.body().string(), JsonArray.class);
                             HashMap<String, PropHuntPlayerData> playerData = parsePropHuntData(j);
                             plugin.updatePlayerData(playerData);
                         }
