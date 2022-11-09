@@ -3,6 +3,7 @@ package com.idyl.prophunt;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
 import javax.inject.Inject;
+
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -91,7 +92,7 @@ public class PropHuntPlugin extends Plugin
 
 			if(client.getLocalPlayer().getName() != null)
 				propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
-					config.hideMode(), config.modelID().toInt()));
+					config.hideMode(), getModelID()));
 		}
 
 		if (event.getGameState() == GameState.LOGIN_SCREEN && originalDotSprites == null)
@@ -123,7 +124,7 @@ public class PropHuntPlugin extends Plugin
 
 		if(client.getLocalPlayer() != null) {
 			propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
-					config.hideMode(), config.modelID().toInt()));
+					config.hideMode(), getModelID()));
 			clientThread.invokeLater(() -> transmogOtherPlayers());
 		}
 	}
@@ -171,7 +172,7 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void transmogPlayer(Player player) {
-		transmogPlayer(player, config.modelID().toInt(), true);
+		transmogPlayer(player, getModelID(), true);
 	}
 
 	private void transmogPlayer(Player player, int modelID, boolean local) {
@@ -279,7 +280,7 @@ public class PropHuntPlugin extends Plugin
 			asynchronous = true
 	)
 	public void getPlayerConfigs() {
-		if(players.length < 1) return;
+		if(players.length < 1 || config.players().isEmpty()) return;
 
 		propHuntDataManager.getPropHuntersByUsernames(players);
 	}
@@ -330,6 +331,10 @@ public class PropHuntPlugin extends Plugin
 		}
 
 		System.arraycopy(originalDotSprites, 0, mapDots, 0, mapDots.length);
+	}
+
+	private int getModelID() {
+		return config.useCustomModelID() ? config.customModelID() : config.modelID().toInt();
 	}
 
 	@Provides

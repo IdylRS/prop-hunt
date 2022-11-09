@@ -8,9 +8,29 @@ import net.runelite.client.config.ConfigItem;
 public interface PropHuntConfig extends Config
 {
 	@ConfigItem(
-		keyName = "hideMode",
-		name = "Hide Mode",
-		description = "Toggle whether you are currently hiding or not"
+			keyName = "players",
+			name = "Player Names",
+			description = "Names of the players you are playing with (comma separated)",
+			position = 1
+	)
+	default String players() { return ""; }
+
+	@ConfigItem(
+			keyName = "model",
+			name = "Model",
+			description = "ID for the model you want to appear as",
+			position = 2
+	)
+	default PropHuntModelId modelID()
+	{
+		return PropHuntModelId.BUSH;
+	}
+
+	@ConfigItem(
+			keyName = "hideMode",
+			name = "Hide Mode",
+			description = "Toggle whether you are currently hiding or not",
+			position = 3
 	)
 	default boolean hideMode()
 	{
@@ -20,7 +40,8 @@ public interface PropHuntConfig extends Config
 	@ConfigItem(
 			keyName = "hideMinimapDots",
 			name = "Hide Minimap Dots",
-			description = "Toggle whether minimap dots are hidden"
+			description = "Toggle whether minimap dots are hidden",
+			position = 4
 	)
 	default boolean hideMinimapDots()
 	{
@@ -28,19 +49,18 @@ public interface PropHuntConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "modelID",
-			name = "Model",
-			description = "ID for the model you want to appear as"
+			keyName = "useCustomModelID",
+			name = "Use Model ID Field",
+			description = "Use the custom Model ID Field instead of the drop down",
+			position = 5
 	)
-	default PropHuntModelId modelID()
-	{
-		return PropHuntModelId.BUSH;
-	}
+	default boolean useCustomModelID() { return false; }
 
 	@ConfigItem(
-			keyName = "players",
-			name = "Player Names",
-			description = "Names of the players you are playing with (comma separated)"
+			keyName = "customModelID",
+			name = "Custom Model ID",
+			description = "The ID of the model you'd like to become",
+			position = 6
 	)
-	default String players() { return ""; }
+	default int customModelID() { return 1565; }
 }
