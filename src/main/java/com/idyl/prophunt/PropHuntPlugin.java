@@ -8,8 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.callback.Hooks;
 import net.runelite.client.config.ConfigManager;
@@ -23,6 +25,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @PluginDescriptor(
@@ -131,6 +134,8 @@ public class PropHuntPlugin extends Plugin
 
 	@Subscribe
 	public void onGameTick(final GameTick event) {
+		if(config.smoothMotion()) return;
+
 		if(config.hideMode() && localDisguise != null) {
 			WorldPoint playerPoint = client.getLocalPlayer().getWorldLocation();
 			localDisguise.setLocation(LocalPoint.fromWorld(client, playerPoint), playerPoint.getPlane());
@@ -138,6 +143,49 @@ public class PropHuntPlugin extends Plugin
 
 		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
 	}
+
+	@Subscribe
+	public void onClientTick(final ClientTick event) {
+		if(!config.smoothMotion()) return;
+
+		if(config.hideMode() && localDisguise != null) {
+			LocalPoint playerPoint = client.getLocalPlayer().getLocalLocation();
+			localDisguise.setLocation(playerPoint, client.getPlane());
+
+		}
+
+		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
+	}
+
+//	@Subscribe
+//	public void onMenuEntryAdded(MenuEntryAdded event) {
+//		if(playerDisguises == null || playerDisguises.size() == 0) return;
+//		if(!event.getOption().startsWith("Walk here")) return;
+//
+//		WorldPoint point = client.getSelectedSceneTile().getWorldLocation();
+//
+//		Set<String> players = playerDisguises
+//				.entrySet()
+//				.stream()
+//				.filter(entry -> {
+//					RuneLiteObject obj = entry.getValue();
+//					WorldPoint tileLoc = WorldPoint.fromLocal(client, obj.getLocation());
+//					boolean validTile = tileLoc.distanceTo(point) <= 0;
+//					boolean validDistance = tileLoc.distanceTo(client.getLocalPlayer().getWorldLocation()) <= config.findRange();
+//
+//					return validTile && validDistance;
+//				})
+//				.map(Map.Entry::getKey)
+//				.collect(Collectors.toSet());
+//
+//		players.forEach(player -> {
+//			client.createMenuEntry(-1)
+//					.setTarget("<col=ff981f>"+player+"</col>")
+//					.setOption("Find")
+//					.setType(MenuAction.EXAMINE_ITEM_GROUND)
+//					.onClick(e -> findPlayer(player));
+//		});
+//	}
 
 	// Hide players who are participating in prop hunt
 	@VisibleForTesting
@@ -215,7 +263,7 @@ public class PropHuntPlugin extends Plugin
 			disguise.setModel(model);
 		}
 
-		disguise.setLocation(loc, player.getWorldLocation().getPlane());
+		disguise.setLocation(player.getLocalLocation(), player.getWorldLocation().getPlane());
 		disguise.setActive(true);
 
 		if(local) {

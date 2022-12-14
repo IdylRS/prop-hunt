@@ -26,6 +26,7 @@ public interface PropHuntConfig extends Config
 		return PropHuntModelId.BUSH;
 	}
 
+
 	@ConfigItem(
 			keyName = "hideMode",
 			name = "Hide Mode",
@@ -37,11 +38,19 @@ public interface PropHuntConfig extends Config
 		return false;
 	}
 
+//	@ConfigItem(
+//			keyName = "findRange",
+//			name = "Find Range",
+//			description = "Distance player has to be from hider for the Find menu option to appear",
+//			position = 4
+//	)
+//	default int findRange() { return 10; }
+
 	@ConfigItem(
 			keyName = "hideMinimapDots",
 			name = "Hide Minimap Dots",
 			description = "Toggle whether minimap dots are hidden",
-			position = 4
+			position = 5
 	)
 	default boolean hideMinimapDots()
 	{
@@ -49,10 +58,18 @@ public interface PropHuntConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "smoothMotion",
+			name = "Smooth Movement",
+			description = "Models will move smoothly (slightly more resource intensive)",
+			position = 6
+	)
+	default boolean smoothMotion() { return true; }
+
+	@ConfigItem(
 			keyName = "useCustomModelID",
 			name = "Use Model ID Field",
 			description = "Use the custom Model ID Field instead of the drop down",
-			position = 5
+			position = 7
 	)
 	default boolean useCustomModelID() { return false; }
 
@@ -60,7 +77,7 @@ public interface PropHuntConfig extends Config
 			keyName = "customModelID",
 			name = "Custom Model ID",
 			description = "The ID of the model you'd like to become",
-			position = 6
+			position = 8
 	)
 	default int customModelID() { return 1565; }
 }
