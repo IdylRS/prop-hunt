@@ -4,23 +4,31 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ClientTick;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.*;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.WidgetType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.callback.Hooks;
+import net.runelite.client.chat.ChatColorType;
+import net.runelite.client.chat.ChatMessageBuilder;
+import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.task.Schedule;
+import net.runelite.client.ui.overlay.OverlayManager;
 
+import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -48,6 +56,18 @@ public class PropHuntPlugin extends Plugin
 	@Inject
 	private PropHuntDataManager propHuntDataManager;
 
+	@Inject
+	private ConfigManager configManager;
+
+	@Inject
+	private ChatMessageManager chatMessageManager;
+
+	@Inject
+	private OverlayManager overlayManager;
+
+	@Inject
+	private PropHuntOverlay propHuntOverlay;
+
 	private RuneLiteObject localDisguise;
 
 	private HashMap<String, RuneLiteObject> playerDisguises = new HashMap<>();
@@ -66,6 +86,9 @@ public class PropHuntPlugin extends Plugin
 
 	private SpritePixels[] originalDotSprites;
 
+	@Getter
+	private int rightClickCounter = 0;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -76,12 +99,15 @@ public class PropHuntPlugin extends Plugin
 		getPlayerConfigs();
 		storeOriginalDots();
 		hideMinimapDots();
+
+		overlayManager.add(propHuntOverlay);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
 		clientThread.invokeLater(this::removeAllTransmogs);
+		overlayManager.remove(propHuntOverlay);
 		hooks.unregisterRenderableDrawListener(drawListener);
 		restoreOriginalDots();
 	}
@@ -157,35 +183,87 @@ public class PropHuntPlugin extends Plugin
 		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
 	}
 
-//	@Subscribe
-//	public void onMenuEntryAdded(MenuEntryAdded event) {
-//		if(playerDisguises == null || playerDisguises.size() == 0) return;
-//		if(!event.getOption().startsWith("Walk here")) return;
-//
-//		WorldPoint point = client.getSelectedSceneTile().getWorldLocation();
-//
-//		Set<String> players = playerDisguises
-//				.entrySet()
-//				.stream()
-//				.filter(entry -> {
-//					RuneLiteObject obj = entry.getValue();
-//					WorldPoint tileLoc = WorldPoint.fromLocal(client, obj.getLocation());
-//					boolean validTile = tileLoc.distanceTo(point) <= 0;
-//					boolean validDistance = tileLoc.distanceTo(client.getLocalPlayer().getWorldLocation()) <= config.findRange();
-//
-//					return validTile && validDistance;
-//				})
-//				.map(Map.Entry::getKey)
-//				.collect(Collectors.toSet());
-//
-//		players.forEach(player -> {
-//			client.createMenuEntry(-1)
-//					.setTarget("<col=ff981f>"+player+"</col>")
-//					.setOption("Find")
-//					.setType(MenuAction.EXAMINE_ITEM_GROUND)
-//					.onClick(e -> findPlayer(player));
-//		});
-//	}
+	@Subscribe
+	public void onMenuOpened(MenuOpened event) {
+		if(config.limitRightClicks() > 0 && !config.hideMode()) {
+			if(rightClickCounter >= config.limitRightClicks()) {
+				sendHighlightedChatMessage("You have used all of your right clicks!");
+				return;
+			}
+			rightClickCounter++;
+		}
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event) {
+		if(playerDisguises == null || playerDisguises.size() == 0) return;
+
+		if(!event.getOption().startsWith("Walk here")) {
+			if(config.depriorizteMenuOptions()) event.getMenuEntry().setDeprioritized(true);
+			return;
+		}
+
+		if(config.findRange() <= 0) return;
+
+		WorldPoint point = client.getSelectedSceneTile().getWorldLocation();
+
+		Set<String> players = playerDisguises
+				.entrySet()
+				.stream()
+				.filter(entry -> {
+					RuneLiteObject obj = entry.getValue();
+					WorldPoint tileLoc = WorldPoint.fromLocal(client, obj.getLocation());
+					boolean validTile = tileLoc.distanceTo(point) <= 0;
+					boolean validDistance = tileLoc.distanceTo(client.getLocalPlayer().getWorldLocation()) <= config.findRange();
+
+					return validTile && validDistance;
+				})
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toSet());
+
+		players.forEach(player -> {
+			client.createMenuEntry(-1)
+					.setTarget("<col=ff981f>"+player+"</col>")
+					.setOption("Find")
+					.setDeprioritized(true)
+					.setType(MenuAction.WALK)
+					.onClick(e -> findPlayer(player));
+		});
+	}
+
+	@Subscribe
+	public void onOverlayMenuClicked(OverlayMenuClicked event)
+	{
+		if (event.getEntry() == PropHuntOverlay.RESET_ENTRY) {
+			rightClickCounter = 0;
+		}
+	}
+
+	private void findPlayer(String player) {
+		sendNormalChatMessage("You found "+player+"!");
+	}
+
+	private void sendNormalChatMessage(String message) {
+		ChatMessageBuilder msg = new ChatMessageBuilder()
+				.append(ChatColorType.NORMAL)
+				.append(message);
+
+		chatMessageManager.queue(QueuedMessage.builder()
+				.type(ChatMessageType.ITEM_EXAMINE)
+				.runeLiteFormattedMessage(msg.build())
+				.build());
+	}
+
+	private void sendHighlightedChatMessage(String message) {
+		ChatMessageBuilder msg = new ChatMessageBuilder()
+				.append(ChatColorType.HIGHLIGHT)
+				.append(message);
+
+		chatMessageManager.queue(QueuedMessage.builder()
+				.type(ChatMessageType.CONSOLE)
+				.runeLiteFormattedMessage(msg.build())
+				.build());
+	}
 
 	// Hide players who are participating in prop hunt
 	@VisibleForTesting

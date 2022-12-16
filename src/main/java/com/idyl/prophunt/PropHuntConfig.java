@@ -38,13 +38,29 @@ public interface PropHuntConfig extends Config
 		return false;
 	}
 
-//	@ConfigItem(
-//			keyName = "findRange",
-//			name = "Find Range",
-//			description = "Distance player has to be from hider for the Find menu option to appear",
-//			position = 4
-//	)
-//	default int findRange() { return 10; }
+	@ConfigItem(
+			keyName = "findRange",
+			name = "Find Range",
+			description = "Distance player has to be from hider for the Find menu option to appear (0 to disable)",
+			position = 4
+	)
+	default int findRange() { return 10; }
+
+	@ConfigItem(
+			keyName = "limitRightClicks",
+			name = "Maximum Right Clicks",
+			description = "Limit the number of right clicks a non-hider can do (0 = unlimited)",
+			position = 5
+	)
+	default int limitRightClicks() { return 10; }
+
+	@ConfigItem(
+			keyName = "depriorizteMenuOptions",
+			name = "Deprioritize Menu Options",
+			description = "Forces 'Walk Here' to the top of every menu to better hide props",
+			position = 6
+	)
+	default boolean depriorizteMenuOptions() { return true; }
 
 	@ConfigItem(
 			keyName = "hideMinimapDots",
