@@ -96,4 +96,12 @@ public interface PropHuntConfig extends Config
 			position = 8
 	)
 	default int customModelID() { return 1565; }
+
+	@ConfigItem(
+			keyName = "animationID",
+			name = "Animation ID",
+			description = "The ID of the animation you'd like to perform",
+			position = 8
+	)
+	default int animationID() { return -1; }
 }

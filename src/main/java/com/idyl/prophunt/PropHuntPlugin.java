@@ -346,6 +346,8 @@ public class PropHuntPlugin extends Plugin
 
 		if(local) {
 			localDisguise = disguise;
+			disguise.setAnimation(client.loadAnimation(config.animationID()));
+			disguise.setShouldLoop(true);
 		}
 		else {
 			playerDisguises.put(player.getName(), disguise);
