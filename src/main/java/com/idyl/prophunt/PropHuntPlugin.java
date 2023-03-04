@@ -2,6 +2,7 @@ package com.idyl.prophunt;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.inject.Inject;
 
 import lombok.Getter;
@@ -85,7 +86,8 @@ public class PropHuntPlugin extends Plugin
 	private static final int DOT_CLAN = 6;
 
 	private SpritePixels[] originalDotSprites;
-
+	@Getter
+	private boolean randToggle = false;
 	@Getter
 	private int rightClickCounter = 0;
 
@@ -137,7 +139,9 @@ public class PropHuntPlugin extends Plugin
 		if(config.hideMode()) {
 			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		}
-
+		if(event.getKey().equals("randomiseModel") && event.getNewValue().equals("true")){
+			randToggle = true;
+		}
 		if(event.getKey().equals("players")) {
 			setPlayersFromString(config.players());
 			getPlayerConfigs();
@@ -301,9 +305,17 @@ public class PropHuntPlugin extends Plugin
 		transmogPlayer(player, getModelID(), true);
 	}
 
-	private void transmogPlayer(Player player, int modelID, boolean local) {
+	private void transmogPlayer(Player player, int modelId, boolean local) {
+		int modelID;
 		if(client.getLocalPlayer() == null) return;
-
+		if(local && randToggle){
+			modelID = getRandomModelID();
+			randToggle = false;
+		}
+		else
+		{
+			modelID = modelId;
+		}
 		RuneLiteObject disguise = client.createRuneLiteObject();
 
 		LocalPoint loc = LocalPoint.fromWorld(client, player.getWorldLocation());
@@ -463,6 +475,9 @@ public class PropHuntPlugin extends Plugin
 
 	private int getModelID() {
 		return config.useCustomModelID() ? config.customModelID() : config.modelID().toInt();
+	}
+	private int getRandomModelID(){
+		return ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1);
 	}
 
 	@Provides
