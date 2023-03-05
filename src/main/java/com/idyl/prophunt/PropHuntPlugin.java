@@ -2,6 +2,9 @@ package com.idyl.prophunt;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
+
+import java.awt.image.BufferedImage;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.inject.Inject;
 
 import lombok.Getter;
@@ -26,7 +29,10 @@ import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.task.Schedule;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
 
 import java.awt.*;
 import java.time.Duration;
@@ -41,6 +47,8 @@ import java.util.stream.Collectors;
 )
 public class PropHuntPlugin extends Plugin
 {
+	public final String CONFIG_KEY = "prophunt";
+
 	@Inject
 	private Client client;
 
@@ -67,6 +75,12 @@ public class PropHuntPlugin extends Plugin
 
 	@Inject
 	private PropHuntOverlay propHuntOverlay;
+
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	private PropHuntPanel panel;
+	private NavigationButton navButton;
 
 	private RuneLiteObject localDisguise;
 
@@ -100,6 +114,16 @@ public class PropHuntPlugin extends Plugin
 		storeOriginalDots();
 		hideMinimapDots();
 
+		panel = new PropHuntPanel(this);
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
+		navButton = NavigationButton.builder()
+				.tooltip("Prop Hunt")
+				.priority(5)
+				.icon(icon)
+				.panel(panel)
+				.build();
+		clientToolbar.addNavigation(navButton);
+
 		overlayManager.add(propHuntOverlay);
 	}
 
@@ -109,6 +133,7 @@ public class PropHuntPlugin extends Plugin
 		clientThread.invokeLater(this::removeAllTransmogs);
 		overlayManager.remove(propHuntOverlay);
 		hooks.unregisterRenderableDrawListener(drawListener);
+		clientToolbar.removeNavigation(navButton);
 		restoreOriginalDots();
 	}
 
@@ -301,9 +326,14 @@ public class PropHuntPlugin extends Plugin
 		transmogPlayer(player, getModelID(), true);
 	}
 
-	private void transmogPlayer(Player player, int modelID, boolean local) {
+	private void transmogPlayer(Player player, int modelId, boolean local) {
+		int modelID;
 		if(client.getLocalPlayer() == null) return;
 
+		else
+		{
+			modelID = modelId;
+		}
 		RuneLiteObject disguise = client.createRuneLiteObject();
 
 		LocalPoint loc = LocalPoint.fromWorld(client, player.getWorldLocation());
@@ -463,6 +493,10 @@ public class PropHuntPlugin extends Plugin
 
 	private int getModelID() {
 		return config.useCustomModelID() ? config.customModelID() : config.modelID().toInt();
+	}
+
+	public void setRandomModelID(){
+		configManager.setConfiguration(CONFIG_KEY, "customModelID", ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1));
 	}
 
 	@Provides

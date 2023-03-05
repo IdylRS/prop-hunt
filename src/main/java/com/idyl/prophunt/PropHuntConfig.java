@@ -104,4 +104,19 @@ public interface PropHuntConfig extends Config
 			position = 8
 	)
 	default int animationID() { return -1; }
+
+	@ConfigItem(
+		keyName = "randMinID",
+		name = "Min Random Model ID",
+		description = "The minimum randomised ID of the model you'd like to become",
+		position = 9
+	)
+	default int randMinID() { return 1; }
+	@ConfigItem(
+		keyName = "randMaxID",
+		name = "Max Random Model ID",
+		description = "The maximum randomised ID of the model you'd like to become",
+		position = 10
+	)
+	default int randMaxID() { return 47604; }
 }
