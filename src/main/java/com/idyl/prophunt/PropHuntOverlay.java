@@ -35,7 +35,7 @@ public class PropHuntOverlay extends OverlayPanel {
     
     @Override
     public Dimension render(Graphics2D graphics) {
-        if(config.limitRightClicks() <= 0) return null;
+        if(!config.limitRightClicks()) return null;
 
         graphics.setFont(FontManager.getRunescapeFont());
         rightClicksRemainingComponent.setRightColor(getColor());
@@ -48,6 +48,6 @@ public class PropHuntOverlay extends OverlayPanel {
     }
 
     private int getClicksRemaining() {
-        return config.limitRightClicks() - plugin.getRightClickCounter();
+        return config.maxRightClicks() - plugin.getRightClickCounter();
     }
 }

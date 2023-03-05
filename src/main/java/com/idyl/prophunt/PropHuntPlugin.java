@@ -196,8 +196,8 @@ public class PropHuntPlugin extends Plugin
 
 	@Subscribe
 	public void onMenuOpened(MenuOpened event) {
-		if(config.limitRightClicks() > 0 && !config.hideMode()) {
-			if(rightClickCounter >= config.limitRightClicks()) {
+		if(config.limitRightClicks() && !config.hideMode()) {
+			if(rightClickCounter >= config.maxRightClicks()) {
 				sendHighlightedChatMessage("You have used all of your right clicks!");
 				return;
 			}

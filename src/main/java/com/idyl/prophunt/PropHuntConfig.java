@@ -59,12 +59,21 @@ public interface PropHuntConfig extends Config
 
 	@ConfigItem(
 			keyName = "limitRightClicks",
-			name = "Maximum Right Clicks",
-			description = "Limit the number of right clicks a non-hider can do (0 = unlimited)",
+			name = "Limit Right Clicks",
+			description = "Limit the number of right clicks a non-hider can do",
 			position = 5,
 			section = setupSettings
 	)
-	default int limitRightClicks() { return 10; }
+	default boolean limitRightClicks() { return false; }
+
+	@ConfigItem(
+			keyName = "maxRightClicks",
+			name = "Maximum Right Clicks",
+			description = "The number of right clicks a non-hider can do",
+			position = 6,
+			section = setupSettings
+	)
+	default int maxRightClicks() { return 10; }
 
 	@ConfigItem(
 			keyName = "depriorizteMenuOptions",
