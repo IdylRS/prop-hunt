@@ -33,17 +33,13 @@ public interface PropHuntConfig extends Config
 	default String players() { return ""; }
 
 	@ConfigItem(
-			keyName = "model",
-			name = "Model",
-			description = "ID for the model you want to appear as",
+			keyName = "models",
+			name = "Custom Model List",
+			description = "Models that you want to play with (formatted: name: id, ...)",
 			position = 2,
-			section = transmogSettings
+			section = setupSettings
 	)
-	default PropHuntModelId modelID()
-	{
-		return PropHuntModelId.BUSH;
-	}
-
+	default String models() { return "Bush: 1565, Crate: 12125, Rock Pile: 1391"; }
 
 	@ConfigItem(
 			keyName = "hideMode",
@@ -97,22 +93,13 @@ public interface PropHuntConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "useCustomModelID",
-			name = "Use Custom Model ID",
-			description = "Use the custom Model ID Field instead of the drop down",
-			position = 7,
-			section = setupSettings
-	)
-	default boolean useCustomModelID() { return false; }
-
-	@ConfigItem(
-			keyName = "customModelID",
-			name = "Custom Model ID",
+			keyName = "modelID",
+			name = "Model ID",
 			description = "The ID of the model you'd like to become",
 			position = 8,
 			section = transmogSettings
 	)
-	default int customModelID() { return 1565; }
+	default int modelID() { return 1565; }
 
 	@ConfigItem(
 		keyName = "randMinID",

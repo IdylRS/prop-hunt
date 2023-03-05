@@ -4,9 +4,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.inject.Inject;
 
+import joptsimple.util.RegexMatcher;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -39,6 +41,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,6 +51,7 @@ import java.util.stream.Collectors;
 public class PropHuntPlugin extends Plugin
 {
 	public final String CONFIG_KEY = "prophunt";
+	public final Pattern modelEntry = Pattern.compile("[a-zA-Z]+:[ ]?[0-9]+");
 
 	@Inject
 	private Client client;
@@ -123,7 +127,7 @@ public class PropHuntPlugin extends Plugin
 				.panel(panel)
 				.build();
 		clientToolbar.addNavigation(navButton);
-
+		updateDropdown();
 		overlayManager.add(propHuntOverlay);
 	}
 
@@ -174,6 +178,10 @@ public class PropHuntPlugin extends Plugin
 			} else {
 				restoreOriginalDots();
 			}
+		}
+
+		if(event.getKey().equals("models")) {
+			updateDropdown();
 		}
 
 		if(client.getLocalPlayer() != null) {
@@ -449,11 +457,33 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private int getModelID() {
-		return config.useCustomModelID() ? config.customModelID() : config.modelID().toInt();
+		return config.modelID();
 	}
 
 	public void setRandomModelID(){
-		configManager.setConfiguration(CONFIG_KEY, "customModelID", ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1));
+		configManager.setConfiguration(CONFIG_KEY, "modelID", ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1));
+	}
+
+	private void updateDropdown() {
+		String[] modelList = config.models().split(",");
+		PropHuntModelId.map.clear();
+
+		for(String model : modelList) {
+			model = model.trim();
+
+			if(!modelEntry.matcher(model).matches()) continue;
+
+			String modelName = model.split(":")[0].trim();
+			String modelId = model.split(":")[1].trim();
+
+			PropHuntModelId.add(modelName, Integer.parseInt(modelId));
+		}
+
+		panel.updateComboBox();
+	}
+
+	public void setModelID(PropHuntModelId modelData) {
+		configManager.setConfiguration(CONFIG_KEY, "modelID", modelData.getId());
 	}
 
 	@Provides
