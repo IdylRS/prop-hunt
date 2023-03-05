@@ -2,6 +2,8 @@ package com.idyl.prophunt;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
+
+import java.awt.image.BufferedImage;
 import java.util.concurrent.ThreadLocalRandom;
 import javax.inject.Inject;
 
@@ -27,7 +29,10 @@ import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.task.Schedule;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
 
 import java.awt.*;
 import java.time.Duration;
@@ -42,6 +47,8 @@ import java.util.stream.Collectors;
 )
 public class PropHuntPlugin extends Plugin
 {
+	public final String CONFIG_KEY = "prophunt";
+
 	@Inject
 	private Client client;
 
@@ -69,6 +76,12 @@ public class PropHuntPlugin extends Plugin
 	@Inject
 	private PropHuntOverlay propHuntOverlay;
 
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	private PropHuntPanel panel;
+	private NavigationButton navButton;
+
 	private RuneLiteObject localDisguise;
 
 	private HashMap<String, RuneLiteObject> playerDisguises = new HashMap<>();
@@ -86,8 +99,7 @@ public class PropHuntPlugin extends Plugin
 	private static final int DOT_CLAN = 6;
 
 	private SpritePixels[] originalDotSprites;
-	@Getter
-	private boolean randToggle = false;
+
 	@Getter
 	private int rightClickCounter = 0;
 
@@ -102,6 +114,16 @@ public class PropHuntPlugin extends Plugin
 		storeOriginalDots();
 		hideMinimapDots();
 
+		panel = new PropHuntPanel(this);
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
+		navButton = NavigationButton.builder()
+				.tooltip("Prop Hunt")
+				.priority(5)
+				.icon(icon)
+				.panel(panel)
+				.build();
+		clientToolbar.addNavigation(navButton);
+
 		overlayManager.add(propHuntOverlay);
 	}
 
@@ -111,6 +133,7 @@ public class PropHuntPlugin extends Plugin
 		clientThread.invokeLater(this::removeAllTransmogs);
 		overlayManager.remove(propHuntOverlay);
 		hooks.unregisterRenderableDrawListener(drawListener);
+		clientToolbar.removeNavigation(navButton);
 		restoreOriginalDots();
 	}
 
@@ -139,9 +162,7 @@ public class PropHuntPlugin extends Plugin
 		if(config.hideMode()) {
 			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
 		}
-		if(event.getKey().equals("randomiseModel") && event.getNewValue().equals("true")){
-			randToggle = true;
-		}
+
 		if(event.getKey().equals("players")) {
 			setPlayersFromString(config.players());
 			getPlayerConfigs();
@@ -308,10 +329,7 @@ public class PropHuntPlugin extends Plugin
 	private void transmogPlayer(Player player, int modelId, boolean local) {
 		int modelID;
 		if(client.getLocalPlayer() == null) return;
-		if(local && randToggle){
-			modelID = getRandomModelID();
-			randToggle = false;
-		}
+
 		else
 		{
 			modelID = modelId;
@@ -476,8 +494,9 @@ public class PropHuntPlugin extends Plugin
 	private int getModelID() {
 		return config.useCustomModelID() ? config.customModelID() : config.modelID().toInt();
 	}
-	private int getRandomModelID(){
-		return ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1);
+
+	public void setRandomModelID(){
+		configManager.setConfiguration(CONFIG_KEY, "customModelID", ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1));
 	}
 
 	@Provides

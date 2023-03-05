@@ -119,11 +119,4 @@ public interface PropHuntConfig extends Config
 		position = 10
 	)
 	default int randMaxID() { return 47604; }
-	@ConfigItem(
-		keyName = "randomiseModel",
-		name = "Randomise Model ID",
-		description = "Randomises the ID of the model you'd like to become",
-		position = 11
-	)
-	default boolean randomiseModel() { return false; }
 }
