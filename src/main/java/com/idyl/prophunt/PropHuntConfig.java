@@ -3,15 +3,32 @@ package com.idyl.prophunt;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 
 @ConfigGroup("prophunt")
 public interface PropHuntConfig extends Config
 {
+	@ConfigSection(
+			name = "Setup",
+			description = "Setup settings for the plugin",
+			position = 0
+	)
+	String setupSettings = "setupSettings";
+
+	@ConfigSection(
+			name = "Transmog",
+			description = "Settings relating to transmog",
+			position = 1
+	)
+	String transmogSettings = "transmogSettings";
+
+
 	@ConfigItem(
 			keyName = "players",
 			name = "Player Names",
 			description = "Names of the players you are playing with (comma separated)",
-			position = 1
+			position = 1,
+			section = setupSettings
 	)
 	default String players() { return ""; }
 
@@ -19,7 +36,8 @@ public interface PropHuntConfig extends Config
 			keyName = "model",
 			name = "Model",
 			description = "ID for the model you want to appear as",
-			position = 2
+			position = 2,
+			section = transmogSettings
 	)
 	default PropHuntModelId modelID()
 	{
@@ -31,7 +49,8 @@ public interface PropHuntConfig extends Config
 			keyName = "hideMode",
 			name = "Hide Mode",
 			description = "Toggle whether you are currently hiding or not",
-			position = 3
+			position = 1,
+			section = transmogSettings
 	)
 	default boolean hideMode()
 	{
@@ -39,18 +58,11 @@ public interface PropHuntConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "findRange",
-			name = "Find Range",
-			description = "Distance player has to be from hider for the Find menu option to appear (0 to disable)",
-			position = 4
-	)
-	default int findRange() { return 10; }
-
-	@ConfigItem(
 			keyName = "limitRightClicks",
 			name = "Maximum Right Clicks",
 			description = "Limit the number of right clicks a non-hider can do (0 = unlimited)",
-			position = 5
+			position = 5,
+			section = setupSettings
 	)
 	default int limitRightClicks() { return 10; }
 
@@ -58,7 +70,8 @@ public interface PropHuntConfig extends Config
 			keyName = "depriorizteMenuOptions",
 			name = "Deprioritize Menu Options",
 			description = "Forces 'Walk Here' to the top of every menu to better hide props",
-			position = 6
+			position = 6,
+			section = setupSettings
 	)
 	default boolean depriorizteMenuOptions() { return true; }
 
@@ -66,7 +79,8 @@ public interface PropHuntConfig extends Config
 			keyName = "hideMinimapDots",
 			name = "Hide Minimap Dots",
 			description = "Toggle whether minimap dots are hidden",
-			position = 5
+			position = 5,
+			section = setupSettings
 	)
 	default boolean hideMinimapDots()
 	{
@@ -74,18 +88,11 @@ public interface PropHuntConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "smoothMotion",
-			name = "Smooth Movement",
-			description = "Models will move smoothly (slightly more resource intensive)",
-			position = 6
-	)
-	default boolean smoothMotion() { return true; }
-
-	@ConfigItem(
 			keyName = "useCustomModelID",
-			name = "Use Model ID Field",
+			name = "Use Custom Model ID",
 			description = "Use the custom Model ID Field instead of the drop down",
-			position = 7
+			position = 7,
+			section = setupSettings
 	)
 	default boolean useCustomModelID() { return false; }
 
@@ -93,30 +100,26 @@ public interface PropHuntConfig extends Config
 			keyName = "customModelID",
 			name = "Custom Model ID",
 			description = "The ID of the model you'd like to become",
-			position = 8
+			position = 8,
+			section = transmogSettings
 	)
 	default int customModelID() { return 1565; }
-
-	@ConfigItem(
-			keyName = "animationID",
-			name = "Animation ID",
-			description = "The ID of the animation you'd like to perform",
-			position = 8
-	)
-	default int animationID() { return -1; }
 
 	@ConfigItem(
 		keyName = "randMinID",
 		name = "Min Random Model ID",
 		description = "The minimum randomised ID of the model you'd like to become",
-		position = 9
+		position = 9,
+		section = setupSettings
 	)
 	default int randMinID() { return 1; }
+
 	@ConfigItem(
 		keyName = "randMaxID",
 		name = "Max Random Model ID",
 		description = "The maximum randomised ID of the model you'd like to become",
-		position = 10
+		position = 10,
+		section = setupSettings
 	)
 	default int randMaxID() { return 47604; }
 }

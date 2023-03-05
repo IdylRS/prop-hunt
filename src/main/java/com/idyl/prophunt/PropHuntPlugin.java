@@ -184,21 +184,7 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onGameTick(final GameTick event) {
-		if(config.smoothMotion()) return;
-
-		if(config.hideMode() && localDisguise != null) {
-			WorldPoint playerPoint = client.getLocalPlayer().getWorldLocation();
-			localDisguise.setLocation(LocalPoint.fromWorld(client, playerPoint), playerPoint.getPlane());
-		}
-
-		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
-	}
-
-	@Subscribe
 	public void onClientTick(final ClientTick event) {
-		if(!config.smoothMotion()) return;
-
 		if(config.hideMode() && localDisguise != null) {
 			LocalPoint playerPoint = client.getLocalPlayer().getLocalLocation();
 			localDisguise.setLocation(playerPoint, client.getPlane());
@@ -227,33 +213,6 @@ public class PropHuntPlugin extends Plugin
 			if(config.depriorizteMenuOptions()) event.getMenuEntry().setDeprioritized(true);
 			return;
 		}
-
-		if(config.findRange() <= 0) return;
-
-		WorldPoint point = client.getSelectedSceneTile().getWorldLocation();
-
-		Set<String> players = playerDisguises
-				.entrySet()
-				.stream()
-				.filter(entry -> {
-					RuneLiteObject obj = entry.getValue();
-					WorldPoint tileLoc = WorldPoint.fromLocal(client, obj.getLocation());
-					boolean validTile = tileLoc.distanceTo(point) <= 0;
-					boolean validDistance = tileLoc.distanceTo(client.getLocalPlayer().getWorldLocation()) <= config.findRange();
-
-					return validTile && validDistance;
-				})
-				.map(Map.Entry::getKey)
-				.collect(Collectors.toSet());
-
-		players.forEach(player -> {
-			client.createMenuEntry(-1)
-					.setTarget("<col=ff981f>"+player+"</col>")
-					.setOption("Find")
-					.setDeprioritized(true)
-					.setType(MenuAction.WALK)
-					.onClick(e -> findPlayer(player));
-		});
 	}
 
 	@Subscribe
@@ -376,8 +335,6 @@ public class PropHuntPlugin extends Plugin
 
 		if(local) {
 			localDisguise = disguise;
-			disguise.setAnimation(client.loadAnimation(config.animationID()));
-			disguise.setShouldLoop(true);
 		}
 		else {
 			playerDisguises.put(player.getName(), disguise);
