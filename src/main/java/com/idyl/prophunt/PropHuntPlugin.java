@@ -393,7 +393,13 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void setPlayersFromString(String playersString) {
-		players = Arrays.stream(playersString.split(",")).map(player -> player.trim()).toArray(String[]::new);
+		String[] p = playersString.split(",");
+
+		for(int i=0;i<p.length;i++) {
+			p[i] = p[i].trim();
+		}
+
+		players = p;
 	}
 
 	@Schedule(
