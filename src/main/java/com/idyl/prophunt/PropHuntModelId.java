@@ -17,20 +17,12 @@ public class PropHuntModelId {
         this.name = name;
     }
 
-    public static PropHuntModelId[] values() {
-        return map.values().toArray(PropHuntModelId[]::new).clone();
-    }
-
     public static PropHuntModelId valueOf(String name) {
         PropHuntModelId model = map.get(name);
         if (model == null) {
             throw new IllegalArgumentException("No model by the name " + name + " found");
         }
         return model;
-    }
-
-    public static String[] keys() {
-        return map.keySet().toArray(String[]::new);
     }
 
     public static void add(String name, int modelID) {
