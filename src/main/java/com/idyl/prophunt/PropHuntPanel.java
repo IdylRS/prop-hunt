@@ -28,31 +28,23 @@ public class PropHuntPanel extends PluginPanel implements ActionListener {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
+        gbc.insets = new Insets(0, 0, 10, 0); // add padding
         title = new JLabel("Prop Hunt");
         title.setFont(FontManager.getRunescapeBoldFont());
         title.setHorizontalAlignment(SwingConstants.CENTER);
         add(title, gbc);
 
-        // Set label and button constraints for second row
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-//        gbc.insets = new Insets(5, 10, 10, 10); // add padding
-        myButton = new JButton("Randomize Model");
-        myButton.addActionListener(this);
-        add(myButton, gbc);
-
         // Set label and button constraints for third row
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 1;
         gbc.gridwidth = 1;
-//        gbc.insets = new Insets(5, 10, 10, 10); // add padding
+        gbc.insets = new Insets(5, 0, 5, 0); // add padding
         JLabel label2 = new JLabel("Custom Model List:");
         add(label2, gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 2;
-//        gbc.insets = new Insets(5, 10, 10, 10); // add padding
+        gbc.gridy = 1;
+        gbc.insets = new Insets(5, 0, 5, 0); // add padding
         comboBox = new JComboBox<>();
         comboBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -64,6 +56,41 @@ public class PropHuntPanel extends PluginPanel implements ActionListener {
         });
         updateComboBox();
         add(comboBox, gbc);
+
+        // Set label and button constraints for second row
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(5, 0, 5, 3); // add padding
+        myButton = new JButton("Randomize Model");
+        myButton.addActionListener(this);
+        add(myButton, gbc);
+
+        // Set label and button constraints for second row
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 0, 5, 3); // add padding
+        JButton rotateClockwiseButton = new JButton("↻");
+        rotateClockwiseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                plugin.rotateModel(1);
+            }
+        });
+        add(rotateClockwiseButton, gbc);
+
+        // Set label and button constraints for second row
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(5, 3, 5, 0); // add padding
+        JButton rotateCounterButton = new JButton("↺");
+        rotateCounterButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                plugin.rotateModel(-1);
+            }
+        });
+        add(rotateCounterButton, gbc);
     }
 
     @Override

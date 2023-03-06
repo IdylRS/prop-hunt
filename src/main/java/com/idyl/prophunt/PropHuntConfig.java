@@ -118,4 +118,12 @@ public interface PropHuntConfig extends Config
 		section = setupSettings
 	)
 	default int randMaxID() { return 47604; }
+
+	@ConfigItem(
+			keyName = "orientation",
+			name = "Orientation",
+			description = "orientation",
+			hidden = true
+	)
+	default int orientation() { return 0; }
 }

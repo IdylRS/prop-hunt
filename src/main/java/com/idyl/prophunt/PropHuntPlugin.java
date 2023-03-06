@@ -150,7 +150,7 @@ public class PropHuntPlugin extends Plugin
 
 			if(client.getLocalPlayer().getName() != null)
 				propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
-					config.hideMode(), getModelID()));
+					config.hideMode(), getModelID(), config.orientation()));
 		}
 
 		if (event.getGameState() == GameState.LOGIN_SCREEN && originalDotSprites == null)
@@ -169,6 +169,7 @@ public class PropHuntPlugin extends Plugin
 
 		if(event.getKey().equals("players")) {
 			setPlayersFromString(config.players());
+			clientThread.invokeLater(() -> removeTransmogs());
 			getPlayerConfigs();
 		}
 
@@ -186,7 +187,7 @@ public class PropHuntPlugin extends Plugin
 
 		if(client.getLocalPlayer() != null) {
 			propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
-					config.hideMode(), getModelID()));
+					config.hideMode(), getModelID(), config.orientation()));
 			clientThread.invokeLater(() -> transmogOtherPlayers());
 		}
 	}
@@ -290,10 +291,10 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void transmogPlayer(Player player) {
-		transmogPlayer(player, getModelID(), true);
+		transmogPlayer(player, getModelID(), config.orientation(), true);
 	}
 
-	private void transmogPlayer(Player player, int modelId, boolean local) {
+	private void transmogPlayer(Player player, int modelId, int orientation, boolean local) {
 		int modelID;
 		if(client.getLocalPlayer() == null) return;
 
@@ -340,7 +341,7 @@ public class PropHuntPlugin extends Plugin
 
 		disguise.setLocation(player.getLocalLocation(), player.getWorldLocation().getPlane());
 		disguise.setActive(true);
-
+		disguise.setOrientation(orientation);
 		if(local) {
 			localDisguise = disguise;
 		}
@@ -359,7 +360,7 @@ public class PropHuntPlugin extends Plugin
 
 			if(data == null || !data.hiding) return;
 
-			transmogPlayer(player, data.modelID, false);
+			transmogPlayer(player, data.modelID, data.orientation, false);
 		});
 	}
 
@@ -375,9 +376,7 @@ public class PropHuntPlugin extends Plugin
 	{
 		playerDisguises.forEach((p, disguise) -> {
 			if(disguise == null) return;
-
 			disguise.setActive(false);
-			disguise = null;
 		});
 	}
 
@@ -394,7 +393,7 @@ public class PropHuntPlugin extends Plugin
 	}
 
 	private void setPlayersFromString(String playersString) {
-		players = playersString.split(",");
+		players = Arrays.stream(playersString.split(",")).map(player -> player.trim()).toArray(String[]::new);
 	}
 
 	@Schedule(
@@ -484,6 +483,15 @@ public class PropHuntPlugin extends Plugin
 
 	public void setModelID(PropHuntModelId modelData) {
 		configManager.setConfiguration(CONFIG_KEY, "modelID", modelData.getId());
+	}
+
+	public void rotateModel(int dir) {
+		if(localDisguise != null) {
+			 int orientation = config.orientation() + 500*dir;
+			 orientation = (((orientation % 2000) + 2000) % 2000);
+			localDisguise.setOrientation(orientation);
+			configManager.setConfiguration(CONFIG_KEY, "orientation", orientation);
+		}
 	}
 
 	@Provides

@@ -28,7 +28,7 @@ public class PropHuntDataManager {
     {
         String username = urlifyString(data.username);
         String url = baseUrl.concat("/prop-hunters/"+username);
-
+        log.info(data.orientation + " ");
         try
         {
             Request r = new Request.Builder()
@@ -112,7 +112,7 @@ public class PropHuntDataManager {
             JsonObject jObj = jsonElement.getAsJsonObject();
             String username = jObj.get("username").getAsString();
             PropHuntPlayerData d = new PropHuntPlayerData(jObj.get("username").getAsString(),
-                    jObj.get("hiding").getAsBoolean(), jObj.get("modelID").getAsInt());
+                    jObj.get("hiding").getAsBoolean(), jObj.get("modelID").getAsInt(), jObj.get("orientation").getAsInt());
             l.put(username, d);
         }
         return l;
