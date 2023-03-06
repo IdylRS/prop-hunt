@@ -28,7 +28,7 @@ public class PropHuntDataManager {
     {
         String username = urlifyString(data.username);
         String url = baseUrl.concat("/prop-hunters/"+username);
-        
+
         try
         {
             Request r = new Request.Builder()
