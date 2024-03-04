@@ -42,6 +42,15 @@ public interface PropHuntConfig extends Config
 	default String models() { return "Bush: 1565, Crate: 12125, Rock Pile: 1391"; }
 
 	@ConfigItem(
+		keyName = "apiServerUrl",
+		name = "API Server URL",
+		description = "The URL of the API to connect to.",
+		position = 3,
+		section = setupSettings
+	)
+	default String apiServerUrl() { return "http://props.idyl.live:8080"; }
+
+	@ConfigItem(
 			keyName = "hideMode",
 			name = "Hide Mode",
 			description = "Toggle whether you are currently hiding or not",
