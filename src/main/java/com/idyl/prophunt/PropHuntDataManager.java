@@ -12,11 +12,13 @@ import java.util.HashMap;
 @Slf4j
 @Singleton
 public class PropHuntDataManager {
-    private final String baseUrl = "http://props.idyl.live:8080";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     @Inject
     private PropHuntPlugin plugin;
+
+    @Inject
+    private PropHuntConfig config;
 
     @Inject
     private OkHttpClient okHttpClient;
@@ -27,7 +29,7 @@ public class PropHuntDataManager {
     protected void updatePropHuntApi(PropHuntPlayerData data)
     {
         String username = urlifyString(data.username);
-        String url = baseUrl.concat("/prop-hunters/"+username);
+        String url = config.apiServerUrl().concat("/prop-hunters/"+username);
 
         try
         {
@@ -71,7 +73,7 @@ public class PropHuntDataManager {
 
         try {
             Request r = new Request.Builder()
-                    .url(baseUrl.concat("/prop-hunters/".concat(playersString)))
+                    .url(config.apiServerUrl().concat("/prop-hunters/".concat(playersString)))
                     .get()
                     .build();
 
