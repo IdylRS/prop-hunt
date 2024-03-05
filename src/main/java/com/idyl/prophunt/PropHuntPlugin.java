@@ -500,6 +500,13 @@ public class PropHuntPlugin extends Plugin
 		}
 	}
 
+	// Toggle Hide function
+	public void toggleHide() {
+		boolean currentMode = configManager.getConfiguration(CONFIG_KEY,"hideMode",boolean.class);
+		boolean newMode = !currentMode;
+		configManager.setConfiguration(CONFIG_KEY, "hideMode", newMode);
+	}
+
 	@Provides
 	PropHuntConfig provideConfig(ConfigManager configManager)
 	{
