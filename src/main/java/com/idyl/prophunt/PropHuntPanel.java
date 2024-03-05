@@ -39,8 +39,8 @@ public class PropHuntPanel extends PluginPanel implements ActionListener {
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.insets = new Insets(5, 0, 5, 0); // add padding
-        JLabel label2 = new JLabel("Custom Model List:");
-        add(label2, gbc);
+        JLabel label3 = new JLabel("Custom Model List:");
+        add(label3, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
@@ -57,9 +57,22 @@ public class PropHuntPanel extends PluginPanel implements ActionListener {
         updateComboBox();
         add(comboBox, gbc);
 
-        // Set label and button constraints for second row
+        // Hide mode toggle button for panel
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(5, 0, 5, 0); // add padding
+        JButton toggleHideMode = new JButton("Toggle Hide Mode");
+        toggleHideMode.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                plugin.toggleHide();
+            }
+        });
+        add(toggleHideMode, gbc);
+
+        // Set label and button constraints for second row
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(5, 0, 5, 3); // add padding
         myButton = new JButton("Randomize Model");
@@ -68,7 +81,7 @@ public class PropHuntPanel extends PluginPanel implements ActionListener {
 
         // Set label and button constraints for second row
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.gridwidth = 1;
         gbc.insets = new Insets(5, 0, 5, 3); // add padding
         JButton rotateClockwiseButton = new JButton("↻");
@@ -81,7 +94,7 @@ public class PropHuntPanel extends PluginPanel implements ActionListener {
 
         // Set label and button constraints for second row
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.gridwidth = 1;
         gbc.insets = new Insets(5, 3, 5, 0); // add padding
         JButton rotateCounterButton = new JButton("↺");
