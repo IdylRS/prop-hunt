@@ -12,7 +12,7 @@ import java.util.HashMap;
 @Slf4j
 @Singleton
 public class PropHuntDataManager {
-    private final String baseUrl = "http://props.idyl.live:8080";
+    private final String baseUrl = "http://3.143.218.214:8080";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     @Inject
