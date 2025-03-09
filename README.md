@@ -27,6 +27,11 @@ Seekers are encouraged to turn on each setting in this menu.
 *Limit Right Clicks:* Limit the number of right clicks a seeker can do. (Guesses they may take)
 *Maximum Right Clicks:* The number of guesses a seeker can make.
 
+**ADVANCED:**
+*This section is meant for those willing and able to stand up their own API server to handle the GET and POST requests of the plugin.*
+
+You may toggle the *User alternate API server?* option to activate the URL you have entered in the preceding field. This option is meant for advanced users who have set up an API server to handle the requests of the plugin. Leave this alone if you are lost.
+
 ## Hider Menu (Side Panel)
 
 ![Navigating to Hider Menu](https://imgur.com/fPx6RH5.png)
@@ -38,14 +43,19 @@ You will find the Prop Hunt panel on the side of your RuneLite client, this is t
 ![Hider Menu](https://imgur.com/Rrgi7Cl.png)
 
 **MODEL PANEL**
+
 In this panel, you have two options:
-			 - *Enter Model ID:* You may explicitly input your desired model ID, this will automatically apply if Hide Mode is 		enabled.
-			 - *Randomizer:* Specifying a range of model IDS, utilizing the Min ID and Max ID fields, you may randomize your model ID by clicking the "Randomize Model" button. This will automatically apply if Hide Mode is enabled.
+
+-*Enter Model ID:* You may explicitly input your desired model ID, this will automatically apply if Hide Mode is enabled.
+
+-*Randomizer:* Specifying a range of model IDS, utilizing the Min ID and Max ID fields, you may randomize your model ID by clicking the "Randomize Model" button. This will automatically apply if Hide Mode is enabled.
 
 **ORIENTATION PANEL**
+
 Use this panel to rotate your model.
 
 **HIDE MODE**
+
 Ensure this button is active if you are a hider, this will swap your model for the chosen ID.
 
 ## How do I win?
