@@ -39,10 +39,8 @@ You will find the Prop Hunt panel on the side of your RuneLite client, this is t
 
 **MODEL PANEL**
 In this panel, you have two options:
-
-			 - Enter Model ID: You may explicitly input your desired model ID, this will automatically apply if Hide Mode is enabled.
-    
-			 - Randomizer: Specifying a range of model IDS, utilizing the Min ID and Max ID fields, you may randomize your model ID by clicking the "Randomize Model" button. This will automatically apply if Hide Mode is enabled.
+	- Enter Model ID: You may explicitly input your desired model ID, this will automatically apply if Hide Mode is enabled.
+	- Randomizer: Specifying a range of model IDS, utilizing the Min ID and Max ID fields, you may randomize your model ID by clicking the "Randomize Model" button. This will automatically apply if Hide Mode is enabled.
 
 **ORIENTATION PANEL**
 Use this panel to rotate your model.
