@@ -119,6 +119,7 @@ public class PropHuntPlugin extends Plugin
 		hideMinimapDots();
 
 		panel = new PropHuntPanel(this);
+
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "panel_icon.png");
 		navButton = NavigationButton.builder()
 				.tooltip("Prop Hunt")
@@ -185,10 +186,14 @@ public class PropHuntPlugin extends Plugin
 			updateDropdown();
 		}
 
+		if(event.getKey().equals("limitRightClicks")) {
+			rightClickCounter = 0;
+		}
+
 		if(client.getLocalPlayer() != null) {
 			propHuntDataManager.updatePropHuntApi(new PropHuntPlayerData(client.getLocalPlayer().getName(),
 					config.hideMode(), getModelID(), config.orientation()));
-			clientThread.invokeLater(() -> transmogOtherPlayers());
+			clientThread.invokeLater(this::transmogOtherPlayers);
 		}
 	}
 
@@ -197,10 +202,9 @@ public class PropHuntPlugin extends Plugin
 		if(config.hideMode() && localDisguise != null) {
 			LocalPoint playerPoint = client.getLocalPlayer().getLocalLocation();
 			localDisguise.setLocation(playerPoint, client.getPlane());
-
 		}
 
-		client.getPlayers().forEach(player -> updateDisguiseLocation(player));
+		client.getPlayers().forEach(this::updateDisguiseLocation);
 	}
 
 	@Subscribe
@@ -290,6 +294,25 @@ public class PropHuntPlugin extends Plugin
 		return true;
 	}
 
+	// Getter for hideMode
+	public boolean getHideMode() {
+		return config.hideMode();  // Fetch the current 'hideMode' value from config
+	}
+
+	// Set the hideMode value via the config
+	public void setHideMode(boolean hideMode) {
+		// Update the config with the new value
+		configManager.setConfiguration(CONFIG_KEY, "hideMode", hideMode);
+
+		// If hideMode is enabled, apply the disguise
+		if (hideMode) {
+			clientThread.invokeLater(() -> transmogPlayer(client.getLocalPlayer()));
+		} else {
+			// If hideMode is disabled, remove any disguises (restore normal appearance)
+			clientThread.invokeLater(this::removeLocalTransmog);
+		}
+	}
+
 	private void transmogPlayer(Player player) {
 		transmogPlayer(player, getModelID(), config.orientation(), true);
 	}
@@ -298,10 +321,15 @@ public class PropHuntPlugin extends Plugin
 		int modelID;
 		if(client.getLocalPlayer() == null) return;
 
+
 		else
 		{
 			modelID = modelId;
 		}
+
+		// Remove the original model if it exists before applying the disguise
+		removeLocalTransmog();
+
 		RuneLiteObject disguise = client.createRuneLiteObject();
 
 		LocalPoint loc = LocalPoint.fromWorld(client, player.getWorldLocation());
@@ -465,6 +493,19 @@ public class PropHuntPlugin extends Plugin
 		return config.modelID();
 	}
 
+	public int getMin() {
+		return config.randMinID();
+	}
+
+	public int getMax() {
+		return config.randMaxID();
+	}
+
+
+	public int getModelId() {
+		return config.modelID();
+	}
+
 	public void setRandomModelID(){
 		configManager.setConfiguration(CONFIG_KEY, "modelID", ThreadLocalRandom.current().nextInt(config.randMinID(), config.randMaxID() + 1));
 	}
@@ -484,7 +525,7 @@ public class PropHuntPlugin extends Plugin
 			PropHuntModelId.add(modelName, Integer.parseInt(modelId));
 		}
 
-		panel.updateComboBox();
+		//panel.updateComboBox();
 	}
 
 	public void setModelID(PropHuntModelId modelData) {
@@ -498,6 +539,14 @@ public class PropHuntPlugin extends Plugin
 			localDisguise.setOrientation(orientation);
 			configManager.setConfiguration(CONFIG_KEY, "orientation", orientation);
 		}
+	}
+
+	public void setMinModelID(int minModelID) {
+		configManager.setConfiguration(CONFIG_KEY, "randMinID", minModelID);
+	}
+
+	public void setMaxModelID(int maxModelID) {
+		configManager.setConfiguration(CONFIG_KEY, "randMaxID", maxModelID);
 	}
 
 	@Provides
