@@ -92,7 +92,7 @@ public interface PropHuntConfig extends Config
 			keyName = "limitRightClicks",
 			name = "Limit Right Clicks",
 			description = "Limit the number of right clicks a seeker can do. (Guesses they may take)",
-			position = 5,
+			position = 6,
 			section = seekerSettings
 	)
 	default boolean limitRightClicks() { return false; }
@@ -101,7 +101,7 @@ public interface PropHuntConfig extends Config
 			keyName = "maxRightClicks",
 			name = "Maximum Right Clicks",
 			description = "The number of guesses a seeker can make.",
-			position = 6,
+			position = 7,
 			section = seekerSettings
 	)
 	default int maxRightClicks() { return 10; }
@@ -110,7 +110,7 @@ public interface PropHuntConfig extends Config
 			keyName = "depriorizteMenuOptions",
 			name = "Deprioritize Menu Options",
 			description = "Forces 'Walk Here' to the top of every menu to better hide props. (Recommended for seekers)",
-			position = 6,
+			position = 5,
 			section = seekerSettings
 	)
 	default boolean depriorizteMenuOptions() { return false; }
