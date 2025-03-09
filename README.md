@@ -27,7 +27,7 @@ Seekers are encouraged to turn on each setting in this menu.
 *Limit Right Clicks:* Limit the number of right clicks a seeker can do. (Guesses they may take)
 *Maximum Right Clicks:* The number of guesses a seeker can make.
 
-**ADVANCED: **
+**ADVANCED:**
 *This section is meant for those willing and able to stand up their own API server to handle the GET and POST requests of the plugin.*
 
 You may toggle the *User alternate API server?* option to activate the URL you have entered in the preceding field. This option is meant for advanced users who have set up an API server to handle the requests of the plugin. Leave this alone if you are lost.
