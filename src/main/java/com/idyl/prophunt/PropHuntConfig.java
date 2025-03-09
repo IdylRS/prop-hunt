@@ -40,10 +40,19 @@ public interface PropHuntConfig extends Config
 	*/
 
 	@ConfigItem(
+			keyName = "alternate",
+			name = "Use alternate API server?",
+			description = "Toggle use of alternate api server. (ADVANCED)",
+			position = 1,
+			section = advancedSettings
+	)
+	default boolean alternate() { return false; }
+
+	@ConfigItem(
 			keyName = "apiURL",
 			name = "Alternate API URL",
-			description = "URL to alternate API server.",
-			position = 1,
+			description = "URL to alternate API server. (ADVANCED)",
+			position = 2,
 			section = advancedSettings
 	)
 	default String apiURL() { return ""; }

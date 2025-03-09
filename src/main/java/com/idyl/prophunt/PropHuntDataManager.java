@@ -14,7 +14,8 @@ import java.util.HashMap;
 @Singleton
 public class PropHuntDataManager {
     @Getter
-    private String baseUrl = "http://3.143.218.214:8080";
+    public final String DEFAULT_URL = "http://3.143.218.214:8080";
+    private String baseUrl = DEFAULT_URL;
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     @Inject

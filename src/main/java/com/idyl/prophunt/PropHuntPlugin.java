@@ -187,8 +187,18 @@ public class PropHuntPlugin extends Plugin
 		}
 
 		if(event.getKey().equals("apiURL")) {
-			propHuntDataManager.setBaseUrl(config.apiURL());
-			System.out.println(propHuntDataManager.getBaseUrl());
+			if(config.alternate()) {
+				propHuntDataManager.setBaseUrl(config.apiURL());
+			}
+		}
+
+		if(event.getKey().equals("alternate")) {
+			if(config.alternate()) {
+				propHuntDataManager.setBaseUrl(config.apiURL());
+			}
+			else {
+				propHuntDataManager.setBaseUrl(propHuntDataManager.DEFAULT_URL);
+			}
 		}
 
 		if(event.getKey().equals("limitRightClicks")) {
