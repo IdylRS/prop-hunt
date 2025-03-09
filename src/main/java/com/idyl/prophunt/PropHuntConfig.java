@@ -22,6 +22,14 @@ public interface PropHuntConfig extends Config
 	)
 	String seekerSettings = "seekerSettings";
 
+	@ConfigSection(
+			name = "Advanced",
+			description = "Advanced settings.",
+			closedByDefault = true,
+			position = 2
+	)
+	String advancedSettings = "advancedSettings";
+
 	/*
 	@ConfigSection(
 			name = "Transmog",
@@ -31,6 +39,14 @@ public interface PropHuntConfig extends Config
 	String transmogSettings = "transmogSettings";
 	*/
 
+	@ConfigItem(
+			keyName = "apiURL",
+			name = "Alternate API URL",
+			description = "URL to alternate API server.",
+			position = 1,
+			section = advancedSettings
+	)
+	default String apiURL() { return ""; }
 
 	@ConfigItem(
 			keyName = "players",

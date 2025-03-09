@@ -186,6 +186,11 @@ public class PropHuntPlugin extends Plugin
 			updateDropdown();
 		}
 
+		if(event.getKey().equals("apiURL")) {
+			propHuntDataManager.setBaseUrl(config.apiURL());
+			System.out.println(propHuntDataManager.getBaseUrl());
+		}
+
 		if(event.getKey().equals("limitRightClicks")) {
 			rightClickCounter = 0;
 		}
